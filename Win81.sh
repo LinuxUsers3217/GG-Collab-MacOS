@@ -16,7 +16,7 @@ sudo qemu-system-x86_64 \
   -drive file=RTL8139F.iso,media=cdrom \
   -device usb-ehci,id=usb,bus=pci.0,addr=0x4 \
   -device usb-tablet \
-  -vnc 123.30.52.130:5900 \
+  -vnc :2 \
   -cpu core2duo \
   -smp cores=2 \
   -device rtl8139,netdev=n0 -netdev user,id=n0 \
