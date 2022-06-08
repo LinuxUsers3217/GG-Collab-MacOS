@@ -12,8 +12,7 @@ curl --silent --show-error http://127.0.0.1:4040/api/tunnels | sed -nE 's/.*publ
 sudo qemu-system-x86_64 \
     -nodefaults \
     -m 8G \
-    -machine q35,accel=kvm \
-    -smp 4,cores=2 \
+    -smp cores=2 \
     -cpu EPYC \
     -device isa-applesmc,osk="$OSK" \
     -smbios type=2 \
