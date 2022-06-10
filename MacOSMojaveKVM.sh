@@ -27,3 +27,4 @@ echo "Open VNC Viewer and connect with port 5900"
 echo "Your VM Specs: $availableRAM"M" / $cpus CPUs"
 echo "User: Mojave-User"
 echo "Pass: 123456"
+curl --silent --show-error http://127.0.0.1:4040/api/tunnels | sed -nE 's/.*public_url":"tcp:..([^"]*).*/\1/p'
