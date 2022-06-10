@@ -3,23 +3,27 @@ unzip -o ngrok-stable-linux-amd64.zip > /dev/null 2>&1
 rm -rf ngrok-stable-linux-amd64.zip
 ./ngrok authtoken 268tKkixRMBBxHKeBCpS6s72ohm_7UvxkT4VkysGcyKi2JpZN
 nohup ./ngrok tcp --region ap 5900 &>/dev/null &
+echo "Checking Virtualization..."
+vtx=$(egrep -i '^flags.*(vmx|svm)' /proc/cpuinfo | wc -l)
+if [ $vtx = 0 ] ; then echo "[Error] Your PC Not Support VT-x / AMD-v. Press Ctrl+C to quit"&& sleep 2711
+fi
 echo Installing Software...
 sudo apt update -y
 sudo apt install wget git qemu-system qemu-utils python3 python3-pip -y 
+git clone https://github.com/foxlet/macOS-Simple-KVM.git
+cd macOS-Simple-KVM
+sudo python3  -m pip install click
+./jumpstart.sh --mojave
 echo "Downloading Mac OS Mojave Disk..." 
 wget -q --show-progress --no-check-certificate -O MyDisk.qcow2 https://tinyurl.com/9v4p8d5c
-curl --silent --show-error http://127.0.0.1:4040/api/tunnels | sed -nE 's/.*public_url":"tcp:..([^"]*).*/\1/p'
-sudo qemu-system-x86_64 \
-    -nodefaults \
-    -m 8G \
-    -smp cores=2 \
-    -cpu EPYC \
-    -device isa-applesmc,osk="$OSK" \
-    -smbios type=2 \
-    -drive if=pflash,format=raw,readonly,file="$OVMF/OVMF_CODE.fd" \
-    -drive if=pflash,format=raw,file="$OVMF/OVMF_VARS-1024x768.fd" \
-    -vga std \
-    -device ich9-intel-hda -device hda-output \
-    -usb -device usb-kbd -device usb-mouse \
-    -netdev user,id=net0 \
-    -drive id=MyDisk,if=virtio,format=qcow2,file=MyDisk.qcow2 \
+cpus=$(lscpu | grep CPU\(s\) | head -1 | cut -f2 -d":" | awk '{$1=$1;print}')
+availableRAMcommand="free -m | tail -2 | head -1 | awk '{print \$7}'"
+availableRAM=$(echo $availableRAMcommand | bash)
+echo HEADLESS=1 MEM=$availableRAM"M" CPUS=$cpus SYSTEM_DISK=MyDisk.qcow2 ./headless.sh > silence.sh
+chmod +x silence.sh
+nohup ./silence.sh &>/dev/null &
+echo "All Done !!! Your Mac OS VM now Ready to use !!!"
+echo "Open VNC Viewer and connect with port 5900"
+echo "Your VM Specs: $availableRAM"M" / $cpus CPUs"
+echo "User: Mojave-User"
+echo "Pass: 123456"
